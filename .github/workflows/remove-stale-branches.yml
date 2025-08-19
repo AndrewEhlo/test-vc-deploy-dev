@@ -33,7 +33,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
-        $repo = ${{ github.repository }}
+        $repo = "${{ github.repository }}"
         $authorForRemove = "vc-ci"
         $branch = ''
         $retentionDays = 90
