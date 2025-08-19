@@ -1,0 +1,122 @@
+
+name: Remove stale branches
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: 'Dry run'
+        required: true
+        type: string
+        default: 'true'
+  push:
+    branches: [VCST-2233]
+  # schedule:
+  #   - cron: '30 14 * * *' # Runs daily at 2:30 PM UTC
+
+jobs:
+  branch-cleanup:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: read
+    # env: 
+    #   GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: 'dev'
+
+    - name: Remove stale branches
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ secrets.REPO_TOKEN }}
+      run: |
+        $repo = "AndrewEhlo/test-vc-theme-b2b-vue"
+        $authorForRemove = "Andrew"
+        $branch = ''
+        $retentionDays = 90
+        $dryRun = ${{ github.event.inputs.dryRun }} #$true
+
+        Write-Host "Deleting MERGED branches:"
+        $mergedBranches = git branch -r --merged # lists remote-tracking branches that have been merged into the current branch
+        foreach ($branch in $mergedBranches) {
+          # $branch = $mergedBranches[1]  
+          $cleanBranchName = $branch.Replace("origin/", "").Replace(' ', '')
+          if ($cleanBranchName -ne "main" -and $cleanBranchName -ne "master" -and $cleanBranchName -ne "dev" -and $cleanBranchName -notlike "*HEAD*") {
+              #-notlike "*origin/HEAD*" exclude a symbolic reference that represents the default branch of the remote repository
+              Write-Host "  Deleting branch $cleanBranchName..."
+              if ($dryRun -eq $false) {
+                  # git branch -d $branch
+                  git push origin --delete $cleanBranchName
+              }
+              else {
+                  # Write-Host "  DRY RUN: git branch -d $branch"
+                  Write-Host "  DRY RUN: git push origin --delete $cleanBranchName"
+              }
+              if ($LASTEXITCODE -ne 0) {
+                  Write-Host "  Failed to delete branch '$cleanBranchName'"
+              }
+              else {
+                  Write-Host "  ...'$cleanBranchName' branch removed"
+              }
+          }
+        }
+        Write-Host "Completed deleting merged branches"
+        Write-Host "`n"
+
+        Write-Host "Deleting UNMERGED branches:"
+        $unmergedBranches = git branch -r --no-merged
+        foreach ($branch in $unmergedBranches) {
+            $branch = $branch.Replace(" ", "")
+            if ($branch -ne "origin/main" -and $branch -ne "origin/master" -and $branch -ne "origin/dev") {
+                $cleanBranchName = $branch.Replace("origin/", "")#.Replace(" ", "")
+                Write-Host "--------------------------------"
+                Write-Host "Checking '$cleanBranchName' branch"
+                # Get the first commit SHA on the branch
+                $lastCommit = $((gh api repos/$repo/commits?sha=$cleanBranchName) | ConvertFrom-Json | Select-Object -First 1).commit.author
+                $author = $lastCommit.name
+                $date = [datetime]$lastCommit.date
+                $daysSinceLastCommit = $((Get-Date) - $date).Days
+                Write-Host "Last commit by $author $daysSinceLastCommit days ago"
+                if ($daysSinceLastCommit -gt $retentionDays -and $author -eq $authorForRemove) {
+                    if ($daysSinceLastCommit -gt $retentionDays) {
+                        Write-Host "Branch is older than $retentionDays days"
+                    }
+                    if ($author -eq $authorForRemove) {
+                        Write-Host "Branch is by $authorForRemove"
+                    }
+                    Write-Host "Deleting '$cleanBranchName' branch"
+                    $prNumber = (gh pr list --repo $repo --state open --head $cleanBranchName --json number | ConvertFrom-Json).number
+                    if ($dryRun -eq $false) {
+                        # git branch -d $cleanBranchName
+                        git push origin --delete $cleanBranchName
+                        if ($prNumber) {
+                            Write-Host "Closing corresponding PR $prNumber"
+                            gh pr close $prNumber --repo $repo
+                        }
+                    }
+                    else {
+                        # Write-Host "Dry run: git branch -d $cleanBranchName"
+                        Write-Host "DRY RUN: git push origin --delete $cleanBranchName"
+                        if ($prNumber) {
+                            Write-Host "DRY RUN: Closing corresponding PR #$prNumber"
+                        }
+                    }
+                    if ($LASTEXITCODE -ne 0) {
+                        Write-Host "Failed to delete branch '$branch'"
+                        Write-Host "--------------------------------"
+                    }
+                    else {
+                        Write-Host "...deleted branch '$cleanBranchName'"
+                        Write-Host "--------------------------------"
+                    }
+                }
+                else {
+                    Write-Host "Keeping '$cleanBranchName' branch"
+                    Write-Host "--------------------------------"
+                }
+            }
+        }
+        Write-Host "Completed deleting unmerged branches"
