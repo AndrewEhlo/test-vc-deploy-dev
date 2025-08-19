@@ -4,10 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        description: 'Do not close PRs and remove branches, just print what would be done'
+        description: 'Skip closing PRs and removing branches, just print what would be done'
         required: true
-        type: string
-        default: 'true'
+        type: choice
+        options:
+          - true
+          - false
       targetBranch:
         description: 'Target branch for PRs'
         required: true
