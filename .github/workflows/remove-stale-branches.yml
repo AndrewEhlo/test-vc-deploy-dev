@@ -23,8 +23,8 @@ on:
         required: true
         type: string
         default: 'vc-ci'
-  push:
-    branches: [VCST-2233]
+  # push:
+  #   branches: [VCST-2233]
   # schedule:
   #   - cron: '30 14 * * *' # Runs daily at 2:30 PM UTC
 
@@ -114,11 +114,11 @@ jobs:
             Write-Host "Deleting closed PR branch: '$branch'"
             
             # delete remote branch
-            if ($dryRun -eq $true) {
-                Write-Host "DRY RUN: git push origin --delete $branch"
+            if ($dryRun -eq $false) {
+                git push origin --delete $branch
             }
             else {
-                git push origin --delete $branch
+                Write-Host "DRY RUN: git push origin --delete $branch"
             }
             
             if ($deleteLocal) {
