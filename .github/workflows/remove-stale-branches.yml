@@ -70,7 +70,7 @@ jobs:
             $daysSinceCreation = $((Get-Date) - $date).Days
             if ($daysSinceCreation -ge $retentionDays) {
                 Write-Host "Closing PR #$($pr.number) for '$branch' branch (created $daysSinceCreation days ago)"
-                if ($dryRun -eq $false) {
+                if ($dryRun -eq 'false') {
                     gh pr comment $($pr.number) --repo $repo --body "Closed by stale branch cleanup workflow"
                     gh pr close $($pr.number) --repo $repo
                     Write-Host "PR $($pr.number) closed"
@@ -116,7 +116,7 @@ jobs:
             Write-Host "Deleting closed PR branch: '$branch'"
             
             # delete remote branch
-            if ($dryRun -eq $false) {
+            if ($dryRun -eq 'false') {
                 git push origin --delete $branch
             }
             else {
