@@ -26,15 +26,15 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        ref: 'dev'
+        ref: 'vcptcore-qa'
 
     - name: Remove stale branches
       shell: pwsh
       env:
         GH_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
-        $repo = "AndrewEhlo/test-vc-theme-b2b-vue"
-        $authorForRemove = "Andrew"
+        $repo = ${{ github.repository }}
+        $authorForRemove = "vc-ci"
         $branch = ''
         $retentionDays = 90
         $dryRun = ${{ github.event.inputs.dryRun }} #$true
