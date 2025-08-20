@@ -117,10 +117,16 @@ jobs:
             
             # delete remote branch
             if ($dryRun -eq 'false') {
-                git push origin --delete $branch
+                git ls-remote --exit-code --heads origin $branch *>$null
+                if ($LASTEXITCODE -eq 0) {
+                    git push origin --delete $branch
+                    Write-Host "✅ Remote branch '$branch' deleted" -ForegroundColor Green
+                } else {
+                    Write-Host "❌ Remote branch '$branch' does not exist" -ForegroundColor Red
+                }
             }
             else {
-                Write-Host "DRY RUN: git push origin --delete $branch"
+                Write-Host "DRY RUN: git push origin --delete $branch" -ForegroundColor Yellow
             }
             
             if ($deleteLocal) {

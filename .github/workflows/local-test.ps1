@@ -13,6 +13,7 @@ $openPrs = $openPrsJson | ConvertFrom-Json
 foreach ($pr in $openPrs) {
     $branch = $pr.headRefName
     $author = $pr.author.name
+    $headBranch = $pr.headRefName
     $date = [datetime]$pr.createdAt
     $daysSinceCreation = $((Get-Date) - $date).Days
     if ($daysSinceCreation -ge $retentionDays) {
@@ -21,12 +22,12 @@ foreach ($pr in $openPrs) {
             gh pr comment $($pr.number) --repo $repo --body "Closed by stale branch cleanup workflow"
             gh pr close $($pr.number) --repo $repo
             Write-Host "PR $($pr.number) closed"
-            git push origin --delete $branch 
+            git push origin --delete $headBranch 
         }
         else {
             Write-Host "DRY RUN: gh pr comment $($pr.number) --repo $repo --body 'Closed by stale branch cleanup workflow'"
             Write-Host "DRY RUN: gh pr close $($pr.number) --repo $repo"
-            Write-Host "DRY RUN: git push origin --delete $branch"
+            Write-Host "DRY RUN: git push origin --delete $headBranch"
         }
     }
 }
@@ -64,10 +65,17 @@ foreach ($pr in $closedPrs) {
     
     # delete remote branch
     if ($dryRun -eq 'false') {
-        git push origin --delete $branch
+        git ls-remote --exit-code --heads origin $branch *>$null
+        if ($LASTEXITCODE -eq 0) {
+            git push origin --delete $branch
+            Write-Host "✅ Remote branch '$branch' deleted" -ForegroundColor Green
+        }
+        else {
+            Write-Host "❌ Remote branch '$branch' does not exist" -ForegroundColor Red
+        }
     }
     else {
-        Write-Host "DRY RUN: git push origin --delete $branch"
+        Write-Host "DRY RUN: git push origin --delete $branch" -ForegroundColor Yellow
     }
     
     if ($deleteLocal) {
