@@ -51,10 +51,10 @@ jobs:
         GH_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
         $repo = "${{ github.repository }}"
-        $dryRun = ${{ github.event.inputs.dryRun }} #$true
+        $dryRun = "${{ github.event.inputs.dryRun }}"
         $excludeBranches = @("main", "master", "dev")
-        $authorForRemove = "Andrew" # ${{ github.event.inputs.authorForRemove }}
-        $retentionDays = 0 # ${{ github.event.inputs.retentionDays }}
+        $authorForRemove = "${{ github.event.inputs.authorForRemove }}"
+        $retentionDays = ${{ github.event.inputs.retentionDays }}
         $targetBranch = "${{ github.event.inputs.targetBranch }}"
 
         # Close stale PRs and remove corresponding branches
