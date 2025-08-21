@@ -22,7 +22,7 @@ on:
         type: number
         default: 15
       authorForRemove:
-        description: 'Author for remove'
+        description: 'Processed PRs author'
         required: true
         type: string
         default: 'vc-ci'
