@@ -34,10 +34,6 @@ on:
           - true
           - false
         default: 'true'
-  # push:
-  #   branches: [VCST-2233]
-  # schedule:
-  #   - cron: '30 14 * * *' # Runs daily at 2:30 PM UTC
 
 jobs:
   branch-cleanup:
@@ -45,8 +41,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
-    # env: 
-    #   GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+    env: 
+      GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
 
     steps:
     - uses: actions/checkout@v4
@@ -56,8 +52,8 @@ jobs:
 
     - name: Remove stale branches
       shell: pwsh
-      env:
-        GH_TOKEN: ${{ secrets.REPO_TOKEN }}
+      # env:
+      #   GH_TOKEN: ${{ secrets.REPO_TOKEN }}
       run: |
         $repo = "${{ github.repository }}"
         $dryRun = "${{ github.event.inputs.dryRun }}"
