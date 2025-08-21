@@ -89,7 +89,7 @@ jobs:
                 }
             }
         }
-        Write-Host "🏁 Done closing stale PRs and removing corresponding branches" -ForegroundColor Green
+        Write-Host "🏁 Done closing stale PRs and removing corresponding branches`n" -ForegroundColor Green
 
         if ($removeStaleBranches -eq 'true') {
           # Delete stale branches
