@@ -68,7 +68,7 @@ jobs:
         $removeStaleBranches = "${{ github.event.inputs.removeStaleBranches }}"
 
         # Close stale PRs and remove corresponding branches
-        Write-Host "Closing stale PRs in $repo, removing corresponding branches. Target branch: $targetBranch, retention days: $retentionDays, author for remove: $authorForRemove" -ForegroundColor Blue
+        Write-Host "▶️ Closing stale PRs in $repo, removing corresponding branches. Target branch: $targetBranch, retention days: $retentionDays, author for remove: $authorForRemove" -ForegroundColor Blue
         $openPrsJson = gh pr list --repo $repo --base $targetBranch --state open --json "number,headRefName,createdAt,author,baseRefName,headRefName"
         $openPrs = $openPrsJson | ConvertFrom-Json
 
@@ -97,7 +97,7 @@ jobs:
 
         if ($removeStaleBranches -eq 'true') {
           # Delete stale branches
-          Write-Host "Scanning closed pull requests in $repo to find and delete stale branches. Target branch: $targetBranch, author for remove: $authorForRemove" -ForegroundColor Blue
+          Write-Host "▶️ Scanning closed pull requests in $repo to find and delete stale branches. Target branch: $targetBranch, author for remove: $authorForRemove" -ForegroundColor Blue
 
           # Get closed PRs using gh
           $closedPrsJson = gh pr list --repo $repo --state closed --base $targetBranch --json "number,headRefName,mergedAt,author"
