@@ -65,6 +65,7 @@ jobs:
         $authorForRemove = "${{ github.event.inputs.authorForRemove }}"
         $retentionDays = ${{ github.event.inputs.retentionDays }}
         $targetBranch = "${{ github.event.inputs.targetBranch }}"
+        $removeStaleBranches = "${{ github.event.inputs.removeStaleBranches }}"
 
         # Close stale PRs and remove corresponding branches
         Write-Host "Closing stale PRs in $repo, removing corresponding branches. Target branch: $targetBranch, retention days: $retentionDays, author for remove: $authorForRemove" -ForegroundColor Blue
