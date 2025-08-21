@@ -80,14 +80,14 @@ jobs:
             if ($daysSinceCreation -ge $retentionDays -and $author -eq $authorForRemove) {
                 Write-Host "Closing PR #$($pr.number) for '$branch' branch (created $daysSinceCreation days ago)" -ForegroundColor Blue
                 if ($dryRun -eq 'false') {
-                    gh pr comment $($pr.number) --repo $repo --body "Closed by stale branch cleanup workflow"
+                    gh pr comment $($pr.number) --repo $repo --body "Closed by stale branch cleanup [workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
                     gh pr close $($pr.number) --repo $repo
                     Write-Host "✅ PR $($pr.number) closed" -ForegroundColor Green
                     git push origin --delete $branch 
                     Write-Host "✅ Remote branch '$branch' deleted" -ForegroundColor Green
                 }
                 else {
-                    Write-Host "📊 DRY RUN: gh pr comment $($pr.number) --repo $repo --body 'Closed by stale branch cleanup workflow'" -ForegroundColor Yellow
+                    Write-Host "📊 DRY RUN: gh pr comment $($pr.number) --repo $repo --body 'Closed by stale branch cleanup [workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})'" -ForegroundColor Yellow
                     Write-Host "📊 DRY RUN: gh pr close $($pr.number) --repo $repo" -ForegroundColor Yellow
                     Write-Host "📊 DRY RUN: git push origin --delete $branch" -ForegroundColor Yellow
                 }
